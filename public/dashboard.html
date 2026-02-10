@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title> Spotify</title>
+
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+body{
+    background:#121212;
+    color:white;
+}
+.logout-btn{
+    margin-left:15px;
+    padding:8px 18px;
+    border-radius:20px;
+    border:none;
+    background:white;
+    color:black;
+    cursor:pointer;
+    font-weight:bold;
+}
+.logout-btn:hover{
+    background:#e6e6e6;
+}
+
+
+/* Layout */
+.app{
+    display:flex;
+    height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+    width:240px;
+    background:black;
+    padding:20px;
+}
+.sidebar h2{margin-bottom:20px}
+.sidebar p{
+    color:#b3b3b3;
+    margin:12px 0;
+    cursor:pointer;
+}
+.sidebar p:hover{color:white}
+
+/* Top bar */
+.topbar{
+    position:fixed;
+    top:0;
+    left:240px;
+    right:0;
+    height:60px;
+    background:rgba(0,0,0,0.6);
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    padding:0 20px;
+    z-index:100;
+}
+.topbar button{
+    margin-left:10px;
+    padding:8px 16px;
+    border-radius:20px;
+    border:none;
+    cursor:pointer;
+}
+.signup{background:transparent;color:white}
+.login{background:white;color:black}
+
+/* Content */
+.content{
+    flex:1;
+    padding:80px 20px 130px;
+    overflow-y:auto;
+    background:linear-gradient(#1f1f1f,#121212);
+}
+h2{margin:20px 0}
+
+/* Cards */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:20px;
+}
+.card{
+    background:#181818;
+    padding:15px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+}
+.card:hover{
+    background:#282828;
+    transform:scale(1.03);
+}
+.card img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+
+/* Mini Player */
+#miniPlayer{
+    position:fixed;
+    bottom:0;
+    left:240px;
+    right:0;
+    height:95px;
+    background:#181818;
+    display:flex;
+    align-items:center;
+    padding:10px 20px;
+    gap:15px;
+    cursor:pointer;
+}
+#miniPlayer img{
+    width:60px;
+    height:60px;
+    border-radius:6px;
+    object-fit:cover;
+}
+
+/* Progress bar */
+.progress{
+    flex:1;
+}
+.progress-container{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    color:#b3b3b3;
+}
+input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    height:4px;
+    background:#535353;
+    border-radius:2px;
+    cursor:pointer;
+    flex:1;
+}
+input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#1db954;
+    opacity:0;
+}
+input[type="range"]:hover::-webkit-slider-thumb{
+    opacity:1;
+}
+
+/* Mini controls */
+.mini-btn{
+    background:none;
+    border:none;
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+}
+
+/* Full Player */
+#fullPlayer{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(#1f1f1f,#121212);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+#fullPlayer img{
+    width:300px;
+    height:300px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+.player-controls{
+    display:flex;
+    align-items:center;
+    gap:25px;
+    margin-top:25px;
+}
+.icon-btn{
+    background:none;
+    border:none;
+    color:white;
+    font-size:24px;
+    cursor:pointer;
+}
+.play-btn{
+    background:white;
+    color:black;
+    border:none;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    font-size:22px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+/* Protect dashboard */
+if(!localStorage.getItem("username")){
+    window.location.href="/login.html";
+}
+</script>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Spotify</h2>
+        <p onclick="showHome()">Home</p>
+        <p onclick="showSearch()">Search</p>
+        <p onclick="showLibrary()">Your Library</p>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+
+        <!-- HOME -->
+        <div id="homeSection">
+            <h2>Trending Songs</h2>
+            <div class="grid" id="songGrid"></div>
+
+            <h2>Movie Playlists</h2>
+            <div class="grid" id="playlistGrid"></div>
+        </div>
+
+        <!-- SEARCH -->
+        <div id="searchSection" style="display:none">
+            <h2>Search</h2>
+            <input id="searchInput" placeholder="Search songs or movies..."
+                   style="padding:10px;width:300px">
+            <div class="grid" id="searchResults"></div>
+        </div>
+
+        <!-- LIBRARY -->
+        <div id="librarySection" style="display:none">
+            <h2>Recently Played</h2>
+            <div class="grid" id="libraryGrid"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+    <span id="adminBox" style="color:white;font-weight:bold;"></span>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+</div>
+
+
+<!-- Mini Player -->
+<div id="miniPlayer" onclick="openFullPlayer()">
+    <img id="miniImg">
+    <div class="progress">
+        <div id="miniTitle"></div>
+        <div class="progress-container">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="seekBar" value="0">
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+    <button class="mini-btn" onclick="event.stopPropagation();togglePlay()">⏯</button>
+</div>
+
+<!-- Full Player -->
+<div id="fullPlayer">
+    <button onclick="closeFullPlayer()" style="position:absolute;top:20px;left:20px">⬇</button>
+    <img id="fullImg">
+    <h2 id="fullTitle"></h2>
+
+    <div class="progress-container" style="width:320px">
+        <span id="fullCurrent">0:00</span>
+        <input type="range" id="fullSeekBar" value="0">
+        <span id="fullDuration">0:00</span>
+    </div>
+
+    <div class="player-controls">
+        <button class="icon-btn" onclick="prevSong()">⏮</button>
+        <button class="play-btn" onclick="togglePlay()">⏯</button>
+        <button class="icon-btn" onclick="nextSong()">⏭</button>
+    </div>
+</div>
+
+<audio id="audio"></audio>
+
+
+<script>
+/* ============================
+   ADMIN AUTH PROTECTION
+============================ */
+const adminName = localStorage.getItem("username");
+if (!adminName) {
+    window.location.href = "login.html";
+}
+
+/* ============================
+   TOP BAR ADMIN UI
+============================ */
+document.getElementById("adminBox").textContent = "Admin: " + adminName;
+document.getElementById("logoutBtn").onclick = () => {
+    localStorage.clear();
+    window.location.href = "login.html";
+};
+
+/* ============================
+   GLOBAL ELEMENTS
+============================ */
+const audio = document.getElementById("audio");
+
+const songGrid = document.getElementById("songGrid");
+const playlistGrid = document.getElementById("playlistGrid");
+const libraryGrid = document.getElementById("libraryGrid");
+const searchResults = document.getElementById("searchResults");
+
+const miniImg = document.getElementById("miniImg");
+const miniTitle = document.getElementById("miniTitle");
+const fullImg = document.getElementById("fullImg");
+const fullTitle = document.getElementById("fullTitle");
+
+const seekBar = document.getElementById("seekBar");
+const fullSeekBar = document.getElementById("fullSeekBar");
+const currentTime = document.getElementById("currentTime");
+const duration = document.getElementById("duration");
+const fullCurrent = document.getElementById("fullCurrent");
+const fullDuration = document.getElementById("fullDuration");
+
+let songs = [];
+let currentIndex = 0;
+let isPlaying = false;
+
+/* ============================
+   TIME FORMAT
+============================ */
+function formatTime(t){
+    if(isNaN(t)) return "0:00";
+    const m = Math.floor(t/60);
+    const s = Math.floor(t%60).toString().padStart(2,"0");
+    return `${m}:${s}`;
+}
+
+/* ============================
+   FETCH SONGS
+============================ */
+fetch("/songs")
+    .then(res => res.json())
+    .then(data => {
+        songs = data;
+        renderTrendingSongs();
+        renderMoviePlaylists();
+    });
+
+/* ============================
+   TRENDING SONGS
+============================ */
+function renderTrendingSongs(){
+    songGrid.innerHTML = "";
+    songs.forEach((song, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${song.image}">
+            <strong>${song.name}</strong>
+        `;
+        card.onclick = () => playSong(index);
+        songGrid.appendChild(card);
+    });
+}
+
+/* ============================
+   MOVIE PLAYLISTS (AUTO)
+============================ */
+function renderMoviePlaylists(){
+    playlistGrid.innerHTML = "";
+    const movies = [...new Set(songs.map(s => s.movie))];
+
+    movies.forEach(movie => {
+        const s = songs.find(x => x.movie === movie);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${s.image}">
+            <strong>${movie}</strong>
+        `;
+        card.onclick = () => openMoviePlaylist(movie);
+        playlistGrid.appendChild(card);
+    });
+}
+
+function openMoviePlaylist(movie){
+    showLibrary();
+    libraryGrid.innerHTML = `<h2>${movie} Songs</h2>`;
+
+    songs.filter(s => s.movie === movie).forEach(song => {
+        const index = songs.indexOf(song);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${song.image}">
+            <strong>${song.name}</strong>
+        `;
+        card.onclick = () => playSong(index);
+        libraryGrid.appendChild(card);
+    });
+}
+
+/* ============================
+   PLAY SONG + SAVE LISTENED
+============================ */
+function playSong(index){
+    currentIndex = index;
+    const song = songs[index];
+
+    audio.src = song.file;
+    audio.play();
+    isPlaying = true;
+
+    miniImg.src = fullImg.src = song.image;
+    miniTitle.textContent = fullTitle.textContent = song.name;
+
+    saveListenedSong(song);
+}
+
+/* ============================
+   SAVE LISTENED SONGS
+============================ */
+function saveListenedSong(song){
+    let listened = JSON.parse(localStorage.getItem("listenedSongs")) || [];
+    listened = listened.filter(s => s.name !== song.name);
+    listened.unshift(song);
+    localStorage.setItem("listenedSongs", JSON.stringify(listened.slice(0,20)));
+}
+
+/* ============================
+   PLAYER CONTROLS
+============================ */
+function togglePlay(){
+    if (!audio.src) return;
+    isPlaying ? audio.pause() : audio.play();
+    isPlaying = !isPlaying;
+}
+
+function nextSong(){
+    if (currentIndex < songs.length - 1) playSong(currentIndex + 1);
+}
+
+function prevSong(){
+    if (currentIndex > 0) playSong(currentIndex - 1);
+}
+
+/* ============================
+   SEEK BAR + TIME
+============================ */
+audio.ontimeupdate = () => {
+    const value = (audio.currentTime / audio.duration) * 100 || 0;
+    seekBar.value = fullSeekBar.value = value;
+
+    currentTime.textContent = fullCurrent.textContent = formatTime(audio.currentTime);
+    duration.textContent = fullDuration.textContent = formatTime(audio.duration);
+};
+
+seekBar.oninput = fullSeekBar.oninput = () => {
+    audio.currentTime = (seekBar.value / 100) * audio.duration;
+};
+
+/* ============================
+   FULL PLAYER
+============================ */
+function openFullPlayer(){
+    if(audio.src) fullPlayer.style.display = "flex";
+}
+function closeFullPlayer(){
+    fullPlayer.style.display = "none";
+}
+
+/* ============================
+   SEARCH
+============================ */
+searchInput.oninput = () => {
+    const q = searchInput.value.toLowerCase();
+    searchResults.innerHTML = "";
+
+    songs.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.movie.toLowerCase().includes(q)
+    ).forEach(song => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${song.image}">
+            <strong>${song.name}</strong>
+        `;
+        card.onclick = () => playSong(songs.indexOf(song));
+        searchResults.appendChild(card);
+    });
+};
+
+/* ============================
+   YOUR LIBRARY (LISTENED)
+============================ */
+function showLibrary(){
+    homeSection.style.display = "none";
+    searchSection.style.display = "none";
+    librarySection.style.display = "block";
+
+    libraryGrid.innerHTML = "";
+    const listened = JSON.parse(localStorage.getItem("listenedSongs")) || [];
+
+    if (listened.length === 0) {
+        libraryGrid.innerHTML = "<p>No songs played yet</p>";
+        return;
+    }
+
+    listened.forEach(song => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <img src="${song.image}">
+            <strong>${song.name}</strong>
+        `;
+        card.onclick = () => {
+            audio.src = song.file;
+            audio.play();
+            isPlaying = true;
+        };
+        libraryGrid.appendChild(card);
+    });
+}
+
+/* ============================
+   NAVIGATION
+============================ */
+function showHome(){
+    homeSection.style.display = "block";
+    searchSection.style.display = "none";
+    librarySection.style.display = "none";
+}
+function showSearch(){
+    homeSection.style.display = "none";
+    searchSection.style.display = "block";
+    librarySection.style.display = "none";
+}
+</script>
+
+
+</body>
+</html>

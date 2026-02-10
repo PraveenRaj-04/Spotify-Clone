@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spotify Login</title>
+
+<style>
+body{
+    background:#121212;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    font-family:Arial, Helvetica, sans-serif;
+    color:white;
+}
+.login-box{
+    background:#181818;
+    padding:40px;
+    border-radius:10px;
+    width:320px;
+}
+.login-box h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+.login-box input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    border:none;
+    border-radius:5px;
+}
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:#1db954;
+    border:none;
+    border-radius:20px;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+.login-box button:hover{
+    background:#1ed760;
+}
+.error{
+    color:red;
+    font-size:14px;
+    text-align:center;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <h2>Spotify Admin Login</h2>
+
+    <input type="text" id="username" placeholder="Admin Name">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+function login(){
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    // simple admin validation (demo)
+    if(username === "admin" && password === "admin123"){
+        localStorage.setItem("username", username);
+        window.location.href = "dashboard.html";
+    } else {
+        document.getElementById("error").textContent = "Invalid Admin Credentials";
+    }
+}
+</script>
+
+</body>
+</html>

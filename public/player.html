@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Now Playing</title>
+    <style>
+        body {
+            background: linear-gradient(#1f1f1f, #121212);
+            color: white;
+            font-family: Arial;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .player-box {
+            text-align: center;
+            width: 300px;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 25px;
+            background: #1db954;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="player-box">
+    <img id="songImage">
+    <h3 id="songName"></h3>
+    <button onclick="togglePlay()">Play / Pause</button>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+// SESSION CHECK
+if (localStorage.getItem("isLoggedIn") !== "true") {
+    window.location.href = "/login.html";
+}
+
+const params = new URLSearchParams(window.location.search);
+
+const songName = params.get("name");
+const songFile = params.get("file");
+const songImage = params.get("image");
+
+const audio = document.getElementById("audio");
+const title = document.getElementById("songName");
+const image = document.getElementById("songImage");
+
+title.innerText = songName;
+image.src = songImage;
+audio.src = songFile;
+
+let isPlaying = true;
+audio.play();
+
+function togglePlay() {
+    if (isPlaying) {
+        audio.pause();
+    } else {
+        audio.play();
+    }
+    isPlaying = !isPlaying;
+}
+</script>
+
+
+</body>
+</html>
