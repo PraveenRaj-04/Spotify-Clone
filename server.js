@@ -3,13 +3,15 @@ const path = require("path");
 
 const app = express();
 
+// Serve public folder
 app.use(express.static(path.join(__dirname, "public")));
 
+// Songs API
 app.get("/songs", (req, res) => {
-   res.json([
+    res.json([
         {
             name: "Naa Ready",
-            movie: "Leo",
+            movie:/ "Leo",
             file: "songs/Naa Ready.mp3",
             image: "/images/leo.jpg"
         },
@@ -73,6 +75,7 @@ app.get("/songs", (req, res) => {
     ]);
 });
 
+// Default route
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "login.html"));
 });
