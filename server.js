@@ -1,39 +1,20 @@
 const express = require("express");
-const cors = require("cors");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
 
-/* Middleware */
-app.use(cors());
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-/* Serve frontend (WEBSITE) */
-app.use(express.static(path.join(__dirname, "../public")));
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, "public")));
 
-/* Serve assets */
-app.use("/songs", express.static(path.join(__dirname, "../assets/songs")));
-app.use("/images", express.static(path.join(__dirname, "../assets/images")));
-
-/* Dummy user */
-const USER = {
-    username: "admin",
-    password: "admin123"
-};
-
-/* Login API */
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-
-    if (username === USER.username && password === USER.password) {
-        res.json({ success: true });
-    } else {
-        res.status(401).json({ success: false });
-    }
-});
-
-/* Songs API */
+/* =========================
+   SONGS API
+========================= */
 app.get("/songs", (req, res) => {
     res.json([
         {
@@ -102,13 +83,31 @@ app.get("/songs", (req, res) => {
     ]);
 });
 
+/* =========================
+   LOGIN API (Optional Demo)
+========================= */
+app.post("/login", (req, res) => {
+    const { username, password } = req.body;
 
-/* Default route → login page */
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../public/login.html"));
+    if (username === "admin" && password === "admin123") {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
 });
 
-/* Start server */
+/* =========================
+   DEFAULT ROUTE
+========================= */
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "login.html"));
+});
+
+/* =========================
+   START SERVER (Render Compatible)
+========================= */
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`🚀 Spotify Clone running at http://localhost:${PORT}`);
+    console.log("Server running on port " + PORT);
 });
