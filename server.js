@@ -17,7 +17,7 @@ app.get("/songs", (req, res) => {
     res.json([
         {
             name: "Naa Ready",
-            movie:/ "Leo",
+            movie: "Leo",
             file: "songs/Naa Ready.mp3",
             image: "/images/leo.jpg"
         },
